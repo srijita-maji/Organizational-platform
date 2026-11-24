@@ -26,80 +26,85 @@ import java.util.List;
 @EnableWebSecurity
 public class SecurityConfig {
 
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
+        @Bean
+        public PasswordEncoder passwordEncoder() {
+                return new BCryptPasswordEncoder();
+        }
 
-    @Bean
-    public SecurityFilterChain filterChain(
-            HttpSecurity http,
-            JwtAuthFilter jwtFilter) throws Exception {
+        @Bean
+        public SecurityFilterChain filterChain(
+                        HttpSecurity http,
+                        JwtAuthFilter jwtFilter) throws Exception {
 
-        http
-                .csrf(AbstractHttpConfigurer::disable)
-                .cors(Customizer.withDefaults())
+                http
+                                .csrf(AbstractHttpConfigurer::disable)
+                                .cors(Customizer.withDefaults())
 
-                .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                                .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
-                .exceptionHandling(e -> e.authenticationEntryPoint(
-                        new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)))
+                                .exceptionHandling(e -> e.authenticationEntryPoint(
+                                                new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)))
 
-                .authorizeHttpRequests(a -> a
+                                .authorizeHttpRequests(a -> a
 
-                        // Allow OPTIONS requests
-                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                                                // Allow OPTIONS requests
+                                                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
-                        // Public frontend pages
-                        .requestMatchers(
-                                "/",
-                                "/index.html",
-                                "/login.html",
-                                "/register.html",
-                                "/css/**",
-                                "/js/**",
-                                "/favicon.ico")
-                        .permitAll()
+                                                // Public frontend pages
+                                                .requestMatchers(
+                                                                "/",
+                                                                "/index.html",
+                                                                "/login.html",
+                                                                "/register.html",
+                                                                "/employee-dashboard.html",
+                                                                "/dept-head-dashboard.html",
+                                                                "/hr-dashboard.html",
+                                                                "/manager-dashboard.html",
+                                                                "/trainer-dashboard.html",
+                                                                "/css/**",
+                                                                "/js/**",
+                                                                "/favicon.ico")
+                                                .permitAll()
 
-                        // Public authentication APIs
-                        .requestMatchers("/api/auth/**").permitAll()
+                                                // Public authentication APIs
+                                                .requestMatchers("/api/auth/**").permitAll()
 
-                        // Protected API endpoints
-                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
-                        .requestMatchers("/api/employee/**").hasRole("EMPLOYEE")
-                        .requestMatchers("/api/dept-head/**").hasRole("DEPT_HEAD")
+                                                // Protected API endpoints
+                                                .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                                                .requestMatchers("/api/employee/**").hasRole("EMPLOYEE")
+                                                .requestMatchers("/api/dept-head/**").hasRole("DEPT_HEAD")
 
-                        // All remaining requests require authentication
-                        .anyRequest().authenticated())
+                                                // All remaining requests require authentication
+                                                .anyRequest().authenticated())
 
-                .addFilterBefore(
-                        jwtFilter,
-                        UsernamePasswordAuthenticationFilter.class);
+                                .addFilterBefore(
+                                                jwtFilter,
+                                                UsernamePasswordAuthenticationFilter.class);
 
-        return http.build();
-    }
+                return http.build();
+        }
 
-    @Bean
-    public CorsConfigurationSource corsConfigurationSource(
-            @Value("${app.cors.allowed-origins}") String origins) {
+        @Bean
+        public CorsConfigurationSource corsConfigurationSource(
+                        @Value("${app.cors.allowed-origins}") String origins) {
 
-        CorsConfiguration cfg = new CorsConfiguration();
+                CorsConfiguration cfg = new CorsConfiguration();
 
-        cfg.setAllowedOrigins(
-                Arrays.stream(origins.split(","))
-                        .map(String::trim)
-                        .toList());
+                cfg.setAllowedOrigins(
+                                Arrays.stream(origins.split(","))
+                                                .map(String::trim)
+                                                .toList());
 
-        cfg.setAllowedMethods(
-                List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+                cfg.setAllowedMethods(
+                                List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
 
-        cfg.setAllowedHeaders(
-                List.of("Authorization", "Content-Type"));
+                cfg.setAllowedHeaders(
+                                List.of("Authorization", "Content-Type"));
 
-        UrlBasedCorsConfigurationSource src = new UrlBasedCorsConfigurationSource();
+                UrlBasedCorsConfigurationSource src = new UrlBasedCorsConfigurationSource();
 
-        src.registerCorsConfiguration("/api/**", cfg);
+                src.registerCorsConfiguration("/api/**", cfg);
 
-        return src;
-    }
+                return src;
+        }
 }
