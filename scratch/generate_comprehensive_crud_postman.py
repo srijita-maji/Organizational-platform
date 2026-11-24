@@ -11,7 +11,7 @@ collection = {
         "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
     },
     "variable": [
-        {"key": "base_url", "value": "http://localhost:8080/api", "type": "string"},
+        {"key": "base_url", "value": "/api", "type": "string"},
         {"key": "jwt_token", "value": "", "type": "string"},
         {"key": "employee_id", "value": "24", "type": "string"},
         {"key": "skill_id", "value": "1", "type": "string"},
@@ -790,7 +790,7 @@ env_data = {
     "id": str(uuid.uuid4()),
     "name": "WKI Local Backend Environment",
     "values": [
-        {"key": "base_url", "value": "http://localhost:8080/api", "type": "default", "enabled": True},
+        {"key": "base_url", "value": "/api", "type": "default", "enabled": True},
         {"key": "jwt_token", "value": "", "type": "secret", "enabled": True},
         {"key": "employee_id", "value": "24", "type": "default", "enabled": True},
         {"key": "skill_id", "value": "1", "type": "default", "enabled": True},

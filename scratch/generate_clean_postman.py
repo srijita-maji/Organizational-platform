@@ -11,7 +11,7 @@ collection = {
         "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
     },
     "variable": [
-        {"key": "base_url", "value": "http://localhost:8080/api", "type": "string"},
+        {"key": "base_url", "value": "/api", "type": "string"},
         {"key": "jwt_token", "value": "", "type": "string"}
     ],
     "auth": {

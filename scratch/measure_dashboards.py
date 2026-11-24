@@ -18,7 +18,7 @@ roles_config = [
 sessions = {}
 for role, email, page in roles_config:
     req = urllib.request.Request(
-        "http://localhost:8080/api/auth/login",
+        "/api/auth/login",
         data=json.dumps({"email": email, "password": "Password123!"}).encode("utf-8"),
         headers={"Content-Type": "application/json"}
     )

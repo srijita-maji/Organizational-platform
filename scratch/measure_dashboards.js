@@ -13,7 +13,7 @@ const roles = [
 async function loginAll() {
   const sessions = {};
   for (const r of roles) {
-    const res = await fetch('http://localhost:8080/api/auth/login', {
+    const res = await fetch('/api/auth/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email: r.email, password: 'Password123!' })

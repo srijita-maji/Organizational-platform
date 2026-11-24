@@ -4,7 +4,7 @@ import urllib.error
 import pymysql
 import sys
 
-BASE_URL = "http://localhost:8080/api"
+BASE_URL = "/api"
 DB_CONFIG = {
     "host": "localhost",
     "port": 3306,

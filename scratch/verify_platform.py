@@ -28,7 +28,7 @@ for page in frontend_pages:
         results[f"frontend_{page}"] = str(e)
 
 # 2. Test Backend API & Authentication
-print("\n=== 2. TESTING BACKEND & REST APIS (http://localhost:8080/api) ===")
+print("\n=== 2. TESTING BACKEND & REST APIS (/api) ===")
 roles_to_test = {
     "EMPLOYEE": ("emp.test@infosys.com", "Password@123", "/employee/me/profile"),
     "HR_MANAGER": ("hr.test@infosys.com", "Password@123", "/hr/overview"),
@@ -40,7 +40,7 @@ roles_to_test = {
 for role, (email, pwd, test_path) in roles_to_test.items():
     # Login
     login_data = json.dumps({"email": email, "password": pwd}).encode("utf-8")
-    req = urllib.request.Request("http://localhost:8080/api/auth/login", data=login_data, headers={"Content-Type": "application/json"})
+    req = urllib.request.Request("/api/auth/login", data=login_data, headers={"Content-Type": "application/json"})
     try:
         with urllib.request.urlopen(req) as resp:
             login_res = json.loads(resp.read().decode("utf-8"))
@@ -48,7 +48,7 @@ for role, (email, pwd, test_path) in roles_to_test.items():
             print(f"[PASS] Login {role:15} -> HTTP {resp.status} (token received)")
             
             # Authenticated Call
-            auth_req = urllib.request.Request(f"http://localhost:8080/api{test_path}", headers={"Authorization": f"Bearer {token}"})
+            auth_req = urllib.request.Request(f"/api{test_path}", headers={"Authorization": f"Bearer {token}"})
             with urllib.request.urlopen(auth_req) as a_resp:
                 print(f"[PASS] Dashboard API {role:15} ({test_path}) -> HTTP {a_resp.status}")
     except Exception as e:

@@ -59,16 +59,28 @@ public class EmployeeDashboardController {
         jdbc.update("UPDATE employees SET first_name = ?, last_name = ? WHERE employee_id = ?",
                 first, last == null || last.isBlank() ? "-" : last, me);
         jdbc.update(
-                "INSERT INTO ed_employee_profiles (employee_id, phone, location, bio, linkedin, education, work_experience, department, job_role) "
+                "INSERT INTO ed_employee_profiles " +
+                        "(employee_id, phone, location, bio, linkedin, education, work_experience, department, job_role) "
                         +
-                        "VALUES (?,?,?,?,?,?,?,?,?) AS new_row " +
-                        "ON DUPLICATE KEY UPDATE phone = new_row.phone, location = new_row.location, " +
-                        "bio = new_row.bio, linkedin = new_row.linkedin, education = new_row.education, " +
-                        "work_experience = new_row.work_experience, department = new_row.department, job_role = new_row.job_role",
-                me, text(body, "phone", 30, false), text(body, "location", 100, false),
-                text(body, "bio", 1000, false), text(body, "linkedin", 255, false),
-                text(body, "education", 500, false), text(body, "workExperience", 1000, false),
-                text(body, "department", 100, false), text(body, "jobRole", 100, false));
+                        "VALUES (?,?,?,?,?,?,?,?,?) " +
+                        "ON DUPLICATE KEY UPDATE " +
+                        "phone = VALUES(phone), " +
+                        "location = VALUES(location), " +
+                        "bio = VALUES(bio), " +
+                        "linkedin = VALUES(linkedin), " +
+                        "education = VALUES(education), " +
+                        "work_experience = VALUES(work_experience), " +
+                        "department = VALUES(department), " +
+                        "job_role = VALUES(job_role)",
+                me,
+                text(body, "phone", 30, false),
+                text(body, "location", 100, false),
+                text(body, "bio", 1000, false),
+                text(body, "linkedin", 255, false),
+                text(body, "education", 500, false),
+                text(body, "workExperience", 1000, false),
+                text(body, "department", 100, false),
+                text(body, "jobRole", 100, false));
         return profile();
     }
 
