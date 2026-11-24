@@ -1,5 +1,5 @@
 // ===== Config =====
-const API_BASE = "http://localhost:8080/api";
+const API_BASE = "/api";
 
 // Where each role lands after login
 const ROLE_HOME = {

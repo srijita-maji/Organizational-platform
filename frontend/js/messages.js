@@ -11,7 +11,7 @@
 (function () {
   "use strict";
 
-  const API = "http://localhost:8080/api/messages";
+  const API = "/api/messages";
   const EMPLOYEE = "EMPLOYEE", MENTOR = "TRAINER_MENTOR";
 
   function readSession() { try { return JSON.parse(localStorage.getItem("wki_session") || "null"); } catch (_) { return null; } }

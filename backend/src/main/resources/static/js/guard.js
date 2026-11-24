@@ -1,6 +1,6 @@
 // Loaded by every dashboard page. The <body data-role="..."> says who may view it.
 (async function guard() {
-  const API_BASE = "http://localhost:8080/api";
+  const API_BASE = "/api";
   const ROLE_HOME = {
     ADMIN: "admin-dashboard.html",
     HR_MANAGER: "hr-dashboard.html",

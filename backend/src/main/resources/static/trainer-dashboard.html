@@ -307,7 +307,7 @@ input:focus, select:focus, textarea:focus {
 <!-- Messages: chat icon beside the notification bell + slide-in chat panel (employee-employee after follow/accept, employee-mentor) -->
 <script src="js/messages.js"></script>
 <script>
-const API = "http://localhost:8080/api/mentor";
+const API = "/api/mentor";
 const $ = (s, r) => (r || document).querySelector(s);
 const esc = s => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 function session() { try { return JSON.parse(localStorage.getItem("wki_session") || "null"); } catch (_) { return null; } }

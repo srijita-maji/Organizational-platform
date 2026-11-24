@@ -268,7 +268,7 @@
 /* ================================================================
    DEPARTMENT HEAD DASHBOARD — Workforce Knowledge Intelligence
    ================================================================ */
-const API = "http://localhost:8080/api/dept-head";
+const API = "/api/dept-head";
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const $ = (s, r) => (r||document).querySelector(s);
 const $$ = (s, r) => [...(r||document).querySelectorAll(s)];
