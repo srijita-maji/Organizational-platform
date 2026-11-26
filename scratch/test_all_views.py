@@ -45,7 +45,7 @@ with open("frontend/employee-dashboard.html", "r", encoding="utf-8") as f:
 
 # Verify that all view containers and main tags are properly closed
 assert "<main id=\"main\" tabindex=\"-1\">" in html
-assert "views.gaps = () => _gapsView() + chatHtml();" in html
+assert "views.gaps = () => chatHtml() + _gapsView();" in html
 assert "function chatHtml()" in html
 assert "function chatLogHtml()" in html
 assert "function mdLite(" in html

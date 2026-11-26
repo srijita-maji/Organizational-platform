@@ -12,8 +12,8 @@ def test_css_rules():
     print("=== 1. VERIFYING CSS SPECIFICITY & OVERRIDES ===")
     
     # Check that style.css doesn't affect .chat-log messages with flex
-    assert ".msg:not(.chat-log *)" in css, "style.css should exclude .chat-log messages"
-    print("[PASS] style.css excludes .chat-log from .msg flex styling")
+    assert "#loginForm .msg" in css, "style.css scopes .msg to auth forms only"
+    print("[PASS] style.css scopes .msg to auth forms only without affecting dashboard chat")
 
     # Check that employee-dashboard.html explicitly sets display: block !important
     assert ".chat-log .msg" in html, "employee-dashboard.html has .chat-log .msg"

@@ -1899,7 +1899,10 @@ body:not([data-role]) aside.brand p {
   background: var(--bg);
 }
 
-.msg:not(.chat-log *) {
+#loginForm .msg,
+#registerForm .msg,
+.auth-box .msg,
+.panel form .msg {
   font-size: 13.5px;
   margin-top: 14px;
   min-height: 20px;
@@ -1908,14 +1911,20 @@ body:not([data-role]) aside.brand p {
   align-items: center;
   gap: 6px;
 }
-.msg.error {
+#loginForm .msg.error,
+#registerForm .msg.error,
+.auth-box .msg.error,
+.panel form .msg.error {
   color: var(--bad);
   background: var(--bad-bg);
   padding: 8px 12px;
   border-radius: 6px;
   border-left: 3px solid var(--bad);
 }
-.msg.ok {
+#loginForm .msg.ok,
+#registerForm .msg.ok,
+.auth-box .msg.ok,
+.panel form .msg.ok {
   color: var(--ok);
   background: var(--ok-bg);
   padding: 8px 12px;
