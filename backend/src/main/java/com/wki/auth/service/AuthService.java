@@ -19,9 +19,8 @@ import java.util.Set;
 
 @Service
 public class AuthService {
-    private static final Set<String> PRIVILEGED = Set.of("ADMIN", "HR_MANAGER");
-    private static final String DUMMY_HASH =
-            "$2a$10$7EqJtq98hPqEX7fNZaFWoOhi5BtHy1Q2k3n5Y7q6Z0rXo5wq0nYhe";
+    private static final Set<String> PRIVILEGED = Set.of("ADMIN");
+    private static final String DUMMY_HASH = "$2a$10$7EqJtq98hPqEX7fNZaFWoOhi5BtHy1Q2k3n5Y7q6Z0rXo5wq0nYhe";
 
     private final EmployeeRepository employees;
     private final RoleRepository roles;
@@ -30,8 +29,8 @@ public class AuthService {
     private final boolean allowPrivilegedSignup;
 
     public AuthService(EmployeeRepository employees, RoleRepository roles, PasswordEncoder encoder,
-                       JwtUtil jwt,
-                       @Value("${app.allow-privileged-self-signup}") boolean allowPrivilegedSignup) {
+            JwtUtil jwt,
+            @Value("${app.allow-privileged-self-signup}") boolean allowPrivilegedSignup) {
         this.employees = employees;
         this.roles = roles;
         this.encoder = encoder;
@@ -62,8 +61,8 @@ public class AuthService {
         e.setEmail(email);
         e.setPasswordHash(encoder.encode(r.getPassword()));
         e.setRoleId(role.getRoleId());
-        e.setDepartmentId(1L);   // default: Engineering
-        e.setDesignationId(1L);  // default: Software Engineer
+        e.setDepartmentId(1L); // default: Engineering
+        e.setDesignationId(1L); // default: Software Engineer
         employees.save(e);
 
         return Map.of("message", "Registration successful");
@@ -73,7 +72,8 @@ public class AuthService {
         String email = r.getEmail().trim().toLowerCase();
         Employee e = employees.findByEmail(email).orElse(null);
 
-        // Always run a BCrypt comparison so response time doesn't reveal whether the email exists.
+        // Always run a BCrypt comparison so response time doesn't reveal whether the
+        // email exists.
         String hash = (e != null && e.getPasswordHash() != null) ? e.getPasswordHash() : DUMMY_HASH;
         boolean ok;
         try {
