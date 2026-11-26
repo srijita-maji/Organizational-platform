@@ -358,38 +358,308 @@
   }
 
   /* ===== ASK-AI CHAT ===== */
-  .chat-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
-  .chat-head .sub { margin: 2px 0 12px; }
+  .card.chat {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 24px 28px;
+    box-shadow: var(--shadow-sm);
+    margin-top: 20px;
+    margin-bottom: 24px;
+    transition: box-shadow var(--transition-normal), border-color var(--transition-normal);
+  }
+  .card.chat:hover {
+    transform: none; /* Keep chat card stable on hover */
+    box-shadow: var(--shadow-sm);
+    border-color: #CAD5E2;
+  }
+  .chat-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+    margin-bottom: 18px;
+    flex-wrap: wrap;
+  }
+  .chat-head-main {
+    flex: 1;
+    min-width: 260px;
+  }
+  .chat-title-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 4px;
+    flex-wrap: wrap;
+  }
+  .chat-head h2 {
+    margin: 0;
+    font-size: 19px;
+    font-weight: 600;
+    color: var(--ink);
+    letter-spacing: -.01em;
+  }
+  .chat-badge {
+    background: linear-gradient(135deg, var(--brand) 0%, var(--brand-dark) 100%);
+    color: #FFFFFF;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .4px;
+    padding: 2px 10px;
+    border-radius: 999px;
+    text-transform: uppercase;
+    box-shadow: 0 1px 3px rgba(11, 110, 117, 0.25);
+  }
+  .chat-head .sub {
+    margin: 0;
+    color: var(--muted);
+    font-size: 13.5px;
+    line-height: 1.5;
+  }
   .chat-log {
-    height: 380px;
+    height: 440px;
+    min-height: 360px;
+    max-height: 540px;
     overflow-y: auto;
     border: 1px solid var(--line);
-    border-radius: 10px;
-    padding: 16px;
+    border-radius: 12px;
+    padding: 20px 22px;
     background: #F8FAFB;
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 16px;
+    scroll-behavior: smooth;
+    box-sizing: border-box;
   }
-  .msg { max-width: 86%; padding: 11px 15px; border-radius: 10px; font-size: 14px; line-height: 1.55; overflow-wrap: anywhere; }
-  .msg.user { align-self: flex-end; background: var(--brand); color: #fff; white-space: pre-wrap; box-shadow: 0 2px 6px rgba(11, 110, 117, 0.25); }
-  .msg.bot { align-self: flex-start; background: #fff; border: 1px solid var(--line); box-shadow: var(--shadow-xs); }
-  .msg.err { border-color: #E5B3AF; background: var(--bad-bg); }
-  .msg p { margin: 0 0 6px; } .msg p:last-child { margin-bottom: 0; }
-  .msg ul, .msg ol { margin: 4px 0 6px 20px; padding: 0; }
-  .msg pre { background: var(--ink); color: #E8EEF5; padding: 10px 12px; border-radius: 6px; overflow-x: auto; font-size: 13px; margin: 6px 0; }
-  .msg code { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: .92em; background: #EEF1F5; padding: 1px 4px; border-radius: 3px; }
-  .msg pre code { background: none; padding: 0; }
-  .msg .src { font-size: 11px; color: var(--muted); margin-top: 6px; }
-  .typing i { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: #98A4B3; margin-right: 4px; animation: blink 1.2s infinite ease-in-out; }
-  .typing i:nth-child(2) { animation-delay: .2s; } .typing i:nth-child(3) { animation-delay: .4s; }
+  /* CRITICAL FIX: Override .msg { display: flex } from style.css */
+  .chat-log .msg,
+  .msg.bot,
+  .msg.user {
+    display: block !important;
+    width: fit-content;
+    max-width: 80%;
+    min-height: auto;
+    margin: 0;
+    font-weight: 400;
+    line-height: 1.6;
+    font-size: 14px;
+    box-sizing: border-box;
+    overflow-wrap: break-word;
+    word-break: break-word;
+  }
+  .chat-log .msg.user {
+    align-self: flex-end;
+    background: var(--brand);
+    color: #FFFFFF;
+    white-space: pre-wrap;
+    padding: 12px 18px;
+    border-radius: 14px;
+    border-top-right-radius: 4px;
+    box-shadow: 0 2px 6px rgba(11, 110, 117, 0.22);
+  }
+  .chat-log .msg.bot {
+    align-self: flex-start;
+    background: #FFFFFF;
+    color: var(--ink);
+    border: 1px solid var(--line);
+    padding: 16px 20px;
+    border-radius: 14px;
+    border-top-left-radius: 4px;
+    box-shadow: 0 1px 3px rgba(16, 28, 43, 0.05);
+  }
+  .chat-log .msg.err {
+    border-color: #E5B3AF;
+    background: var(--bad-bg);
+    color: var(--bad);
+  }
+  .chat-log .msg p {
+    margin: 0 0 10px;
+    line-height: 1.6;
+    color: inherit;
+  }
+  .chat-log .msg p:last-child {
+    margin-bottom: 0;
+  }
+  .chat-log .msg ul,
+  .chat-log .msg ol {
+    margin: 8px 0 10px 22px;
+    padding: 0;
+    line-height: 1.6;
+    color: inherit;
+  }
+  .chat-log .msg li {
+    margin-bottom: 6px;
+  }
+  .chat-log .msg li:last-child {
+    margin-bottom: 0;
+  }
+  .chat-log .msg strong {
+    font-weight: 600;
+    color: var(--ink);
+  }
+  .chat-log .msg pre {
+    background: #101C2B;
+    color: #E8EEF5;
+    padding: 12px 16px;
+    border-radius: 8px;
+    overflow-x: auto;
+    font-size: 13px;
+    margin: 10px 0;
+    line-height: 1.5;
+  }
+  .chat-log .msg code {
+    font-family: ui-monospace, Menlo, Consolas, monospace;
+    font-size: .92em;
+    background: #EEF1F5;
+    color: #0C6167;
+    padding: 2px 5px;
+    border-radius: 4px;
+  }
+  .chat-log .msg pre code {
+    background: none;
+    color: inherit;
+    padding: 0;
+  }
+  .chat-log .msg .src {
+    font-size: 11.5px;
+    color: var(--muted);
+    margin-top: 12px;
+    padding-top: 8px;
+    border-top: 1px solid #EEF2F6;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 500;
+  }
+  .chat-log .msg .src::before {
+    content: "";
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--brand);
+    flex-shrink: 0;
+  }
+  .chat-log .msg.typing {
+    display: inline-flex !important;
+    align-items: center;
+    min-height: 38px;
+    padding: 10px 16px;
+    border-radius: 12px;
+    border-top-left-radius: 4px;
+  }
+  .typing i {
+    display: inline-block;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #98A4B3;
+    margin-right: 5px;
+    animation: blink 1.2s infinite ease-in-out;
+  }
+  .typing i:nth-child(2) { animation-delay: .2s; }
+  .typing i:nth-child(3) { animation-delay: .4s; }
   @keyframes blink { 0%, 80%, 100% { opacity: .25; } 40% { opacity: 1; } }
   @media (prefers-reduced-motion: reduce) { .typing i { animation: none; } }
-  .chat-suggest { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
-  .chipbtn { border: 1px solid #9DB9BC; background: #fff; color: var(--brand-dark); cursor: pointer; font: inherit; font-size: 13px; font-weight: 500; padding: 6px 12px; border-radius: 6px; transition: all .15s ease; }
-  .chipbtn:hover { background: var(--info-bg); border-color: var(--brand); transform: translateY(-1px); }
-  .chat-form { display: flex; gap: 10px; margin-top: 12px; align-items: flex-end; }
-  .chat-form textarea { min-height: 44px; height: 44px; resize: none; flex: 1; }
+
+  /* Suggested questions */
+  .chat-suggest {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    margin-top: 14px;
+  }
+  .chat-suggest-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--muted);
+    letter-spacing: .3px;
+    text-transform: uppercase;
+    margin-right: 2px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .chipbtn {
+    border: 1px solid #CFD8DC;
+    background: #FFFFFF;
+    color: var(--brand-dark);
+    cursor: pointer;
+    font: inherit;
+    font-size: 13px;
+    font-weight: 500;
+    padding: 7px 14px;
+    border-radius: 999px;
+    transition: all .15s ease;
+    display: inline-flex;
+    align-items: center;
+    box-shadow: 0 1px 2px rgba(16, 28, 43, 0.04);
+  }
+  .chipbtn:hover {
+    background: var(--brand-tint);
+    border-color: var(--brand);
+    color: var(--brand);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 6px rgba(11, 110, 117, 0.15);
+  }
+  .chipbtn:active {
+    transform: translateY(0);
+  }
+
+  /* Chat form input */
+  .chat-form {
+    display: flex;
+    gap: 10px;
+    margin-top: 14px;
+    align-items: center;
+    width: 100%;
+    box-sizing: border-box;
+  }
+  .chat-form textarea {
+    flex: 1;
+    min-width: 0;
+    min-height: 48px;
+    height: 48px;
+    padding: 13px 16px;
+    border: 1px solid #CFD6DE;
+    border-radius: 10px;
+    background: #FFFFFF;
+    font-size: 14px;
+    line-height: 1.45;
+    color: var(--ink);
+    resize: none;
+    box-shadow: inset 0 1px 2px rgba(16, 28, 43, 0.04);
+    transition: border-color .15s ease, box-shadow .15s ease;
+    box-sizing: border-box;
+  }
+  .chat-form textarea:focus {
+    outline: none;
+    border-color: var(--brand);
+    box-shadow: 0 0 0 3px rgba(11, 110, 117, 0.16);
+  }
+  .chat-form .btn {
+    height: 48px;
+    padding: 0 22px;
+    font-size: 14px;
+    font-weight: 600;
+    border-radius: 10px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    flex-shrink: 0;
+    box-sizing: border-box;
+  }
+
+  /* Responsive breakpoints for chat */
+  @media (max-width: 768px) {
+    .card.chat { padding: 18px 16px; }
+    .chat-log { height: 380px; padding: 14px 12px; }
+    .chat-log .msg { max-width: 92%; }
+    .chat-form { gap: 8px; }
+    .chat-form .btn { padding: 0 16px; }
+  }
 
   /* ===== RESPONSIVE ===== */
   @media (max-width: 992px) {
@@ -958,7 +1228,8 @@ function mdLite(src) {
     const close = () => { if (list) { out.push(`</${list}>`); list = null; } };
     seg.split("\n").forEach(line => {
       let m;
-      if ((m = line.match(/^\s*[-*]\s+(.*)$/))) { if (list !== "ul") { close(); out.push("<ul>"); list = "ul"; } out.push(`<li>${inl(m[1])}</li>`); }
+      if ((m = line.match(/^\s*#{1,4}\s+(.*)$/))) { close(); out.push(`<strong style="display:block;margin:10px 0 4px;font-size:14.5px;color:var(--ink)">${inl(m[1])}</strong>`); }
+      else if ((m = line.match(/^\s*[-*•]\s+(.*)$/))) { if (list !== "ul") { close(); out.push("<ul>"); list = "ul"; } out.push(`<li>${inl(m[1])}</li>`); }
       else if ((m = line.match(/^\s*\d+[.)]\s+(.*)$/))) { if (list !== "ol") { close(); out.push("<ol>"); list = "ol"; } out.push(`<li>${inl(m[1])}</li>`); }
       else { close(); if (line.trim()) out.push(`<p>${inl(line)}</p>`); }
     });
@@ -976,11 +1247,11 @@ function chatHtml() {
   const ideas = [first ? `Why am I weak in ${first.skillName}?` : "How do I start improving my skills?",
     first ? `Give me a 2-week plan for ${first.skillName}` : "What should I learn first?",
     "Explain the questions I got wrong", "Which course should I take first?"];
-  return `<div class="card chat"><div class="chat-head"><div><h2>Ask AI about your gaps</h2><p class="sub">Ask a doubt about any skill you are weak in. Answers use your assessment results.</p></div>
+  return `<div class="card chat"><div class="chat-head"><div class="chat-head-main"><div class="chat-title-row"><h2>Ask AI about your gaps</h2><span class="chat-badge">AI Assistant</span></div><p class="sub">Ask a doubt about any skill you are weak in. Answers use your assessment results.</p></div>
     <button class="btn ghost small noprint" data-act="chatclear">Clear chat</button></div>
     <div class="chat-log" id="chatLog" role="log" aria-live="polite">${chatLogHtml()}</div>
-    <div class="chat-suggest noprint">${ideas.map(t => `<button type="button" class="chipbtn" data-act="chatask" data-q="${esc(t)}">${esc(t)}</button>`).join("")}</div>
-    <form class="chat-form noprint" data-form="chat"><textarea name="message" rows="1" maxlength="1500" required aria-label="Your question" placeholder="Type your doubt, for example: what is the difference between INNER JOIN and LEFT JOIN?"></textarea><button class="btn" type="submit">Send</button></form></div>`;
+    <div class="chat-suggest noprint"><span class="chat-suggest-label">Suggested:</span>${ideas.map(t => `<button type="button" class="chipbtn" data-act="chatask" data-q="${esc(t)}">${esc(t)}</button>`).join("")}</div>
+    <form class="chat-form noprint" data-form="chat"><textarea name="message" rows="1" maxlength="1500" required aria-label="Your question" placeholder="Type your doubt, for example: what is the difference between INNER JOIN and LEFT JOIN?"></textarea><button class="btn" type="submit"><span>Send</span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg></button></form></div>`;
 }
 function chatPaint() {
   const log = $("#chatLog"); if (log) { log.innerHTML = chatLogHtml(); log.scrollTop = log.scrollHeight; }

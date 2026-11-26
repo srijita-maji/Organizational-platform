@@ -40,7 +40,7 @@ roles_to_test = {
 for role, (email, pwd, test_path) in roles_to_test.items():
     # Login
     login_data = json.dumps({"email": email, "password": pwd}).encode("utf-8")
-    req = urllib.request.Request("/api/auth/login", data=login_data, headers={"Content-Type": "application/json"})
+    req = urllib.request.Request("http://localhost:8080/api/auth/login", data=login_data, headers={"Content-Type": "application/json"})
     try:
         with urllib.request.urlopen(req) as resp:
             login_res = json.loads(resp.read().decode("utf-8"))

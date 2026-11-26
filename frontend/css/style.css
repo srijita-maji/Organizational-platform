@@ -1899,7 +1899,7 @@ body:not([data-role]) aside.brand p {
   background: var(--bg);
 }
 
-.msg {
+.msg:not(.chat-log *) {
   font-size: 13.5px;
   margin-top: 14px;
   min-height: 20px;
