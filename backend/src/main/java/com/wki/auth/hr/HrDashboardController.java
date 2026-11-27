@@ -337,19 +337,68 @@ public class HrDashboardController {
     // =========================================================================
     // D. ROLE REQUIREMENTS (TARGET ROLES)
     // =========================================================================
+    private volatile Boolean hasRoleSkillReqLevelCol = null;
+
+    private boolean checkRoleSkillRequiredLevelColumn() {
+        if (hasRoleSkillReqLevelCol != null) {
+            return hasRoleSkillReqLevelCol;
+        }
+        synchronized (this) {
+            if (hasRoleSkillReqLevelCol != null) {
+                return hasRoleSkillReqLevelCol;
+            }
+            try {
+                Integer count = jdbc.queryForObject(
+                    "SELECT COUNT(*) FROM information_schema.COLUMNS " +
+                    "WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'ed_job_role_skills' AND COLUMN_NAME = 'required_level'",
+                    Integer.class);
+                if (count != null && count > 0) {
+                    hasRoleSkillReqLevelCol = true;
+                    return true;
+                }
+                try {
+                    jdbc.execute("ALTER TABLE ed_job_role_skills ADD COLUMN required_level TINYINT NOT NULL DEFAULT 3");
+                    hasRoleSkillReqLevelCol = true;
+                    return true;
+                } catch (Exception ex) {
+                    // ALTER may fail if permissions are restricted
+                }
+            } catch (Exception e) {
+                // Ignore and test via probe
+            }
+
+            try {
+                jdbc.queryForList("SELECT required_level FROM ed_job_role_skills LIMIT 1");
+                hasRoleSkillReqLevelCol = true;
+                return true;
+            } catch (Exception e) {
+                hasRoleSkillReqLevelCol = false;
+                return false;
+            }
+        }
+    }
+
     @GetMapping("/roles")
     public List<Map<String, Object>> getTargetRoles() {
         List<Map<String, Object>> roles = jdbc.queryForList(
                 "SELECT role_id AS roleId, role_name AS roleName, description FROM ed_job_roles ORDER BY role_name ASC");
 
+        boolean hasCol = checkRoleSkillRequiredLevelColumn();
+        String skillsQuery = hasCol
+                ? "SELECT jrs.skill_id AS skillId, s.skill_name AS skillName, s.category, " +
+                  "COALESCE(jrs.required_level, s.default_required_level, 3) AS requiredLevel, jrs.weight_pct AS weightPct " +
+                  "FROM ed_job_role_skills jrs " +
+                  "JOIN ed_skills s ON s.skill_id = jrs.skill_id " +
+                  "WHERE jrs.role_id = ? ORDER BY jrs.weight_pct DESC, s.skill_name ASC"
+                : "SELECT jrs.skill_id AS skillId, s.skill_name AS skillName, s.category, " +
+                  "COALESCE(s.default_required_level, 3) AS requiredLevel, jrs.weight_pct AS weightPct " +
+                  "FROM ed_job_role_skills jrs " +
+                  "JOIN ed_skills s ON s.skill_id = jrs.skill_id " +
+                  "WHERE jrs.role_id = ? ORDER BY jrs.weight_pct DESC, s.skill_name ASC";
+
         for (Map<String, Object> role : roles) {
             long roleId = ((Number) role.get("roleId")).longValue();
-            List<Map<String, Object>> reqSkills = jdbc.queryForList(
-                    "SELECT jrs.skill_id AS skillId, s.skill_name AS skillName, s.category, " +
-                    "jrs.required_level AS requiredLevel, jrs.weight_pct AS weightPct " +
-                    "FROM ed_job_role_skills jrs " +
-                    "JOIN ed_skills s ON s.skill_id = jrs.skill_id " +
-                    "WHERE jrs.role_id = ? ORDER BY jrs.weight_pct DESC", roleId);
+            List<Map<String, Object>> reqSkills = jdbc.queryForList(skillsQuery, roleId);
             role.put("skills", reqSkills);
 
             // Count employees having target role
@@ -396,13 +445,44 @@ public class HrDashboardController {
         int rLevel = reqLevel != null ? reqLevel.intValue() : 3;
         int wPct = weight != null ? weight.intValue() : 25;
 
-        jdbc.update(
-                "INSERT INTO ed_job_role_skills (role_id, skill_id, required_level, weight_pct) " +
-                "VALUES (?, ?, ?, ?) " +
-                "ON DUPLICATE KEY UPDATE required_level = VALUES(required_level), weight_pct = VALUES(weight_pct)",
-                id, skillId.longValue(), rLevel, wPct);
+        boolean hasCol = checkRoleSkillRequiredLevelColumn();
+        if (hasCol) {
+            jdbc.update(
+                    "INSERT INTO ed_job_role_skills (role_id, skill_id, required_level, weight_pct) " +
+                    "VALUES (?, ?, ?, ?) " +
+                    "ON DUPLICATE KEY UPDATE required_level = VALUES(required_level), weight_pct = VALUES(weight_pct)",
+                    id, skillId.longValue(), rLevel, wPct);
+        } else {
+            jdbc.update(
+                    "INSERT INTO ed_job_role_skills (role_id, skill_id, weight_pct) " +
+                    "VALUES (?, ?, ?) " +
+                    "ON DUPLICATE KEY UPDATE weight_pct = VALUES(weight_pct)",
+                    id, skillId.longValue(), wPct);
+        }
 
         return Map.of("message", "Role skill requirement saved successfully");
+    }
+
+    @PutMapping("/roles/{id}/skills/{skillId}")
+    @Transactional
+    public Map<String, Object> updateRoleSkill(@PathVariable long id, @PathVariable long skillId, @RequestBody Map<String, Object> body) {
+        Number reqLevel = (Number) body.get("requiredLevel");
+        Number weight = (Number) body.get("weightPct");
+        int rLevel = reqLevel != null ? reqLevel.intValue() : 3;
+        int wPct = weight != null ? weight.intValue() : 25;
+
+        boolean hasCol = checkRoleSkillRequiredLevelColumn();
+        if (hasCol) {
+            jdbc.update(
+                    "UPDATE ed_job_role_skills SET required_level = ?, weight_pct = ? WHERE role_id = ? AND skill_id = ?",
+                    rLevel, wPct, id, skillId);
+        } else {
+            jdbc.update(
+                    "UPDATE ed_job_role_skills SET weight_pct = ? WHERE role_id = ? AND skill_id = ?",
+                    wPct, id, skillId);
+        }
+
+        return Map.of("message", "Role skill requirement updated successfully");
     }
 
     @DeleteMapping("/roles/{id}/skills/{skillId}")

@@ -37,6 +37,14 @@ public class RoleAssessmentSchema implements CommandLineRunner {
                 jdbc.execute("ALTER TABLE ed_employee_profiles ADD COLUMN target_role_id BIGINT NULL");
                 System.out.println("RoleAssessmentSchema: added ed_employee_profiles.target_role_id");
             }
+
+            Integer rlc = jdbc.queryForObject(
+                    "SELECT COUNT(*) FROM information_schema.columns WHERE table_schema = DATABASE() " +
+                    "AND table_name = 'ed_job_role_skills' AND column_name = 'required_level'", Integer.class);
+            if (rlc == null || rlc == 0) {
+                jdbc.execute("ALTER TABLE ed_job_role_skills ADD COLUMN required_level TINYINT NOT NULL DEFAULT 3");
+                System.out.println("RoleAssessmentSchema: added ed_job_role_skills.required_level");
+            }
             System.out.println("RoleAssessmentSchema: role assessment tables are ready");
         } catch (Exception e) {
             System.err.println("RoleAssessmentSchema FAILED: " + e.getMessage());

@@ -67,6 +67,19 @@ public class HrSchema implements CommandLineRunner {
                 // Column already exists
             }
 
+            // 4. Ensure ed_job_role_skills has required_level column
+            try {
+                Integer count = jdbc.queryForObject(
+                    "SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() " +
+                    "AND TABLE_NAME = 'ed_job_role_skills' AND COLUMN_NAME = 'required_level'", Integer.class);
+                if (count == null || count == 0) {
+                    jdbc.execute("ALTER TABLE ed_job_role_skills ADD COLUMN required_level TINYINT NOT NULL DEFAULT 3");
+                    System.out.println("HrSchema: added ed_job_role_skills.required_level");
+                }
+            } catch (Exception ignored) {
+                // Ignore if information_schema query or alter fails
+            }
+
             System.out.println("HrSchema: HR Specialist tables and columns are ready");
         } catch (Exception e) {
             System.err.println("HrSchema initialization notice: " + e.getMessage());

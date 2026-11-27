@@ -819,40 +819,70 @@
           <button class="btn" data-act="openAddRoleModal">+ Create Target Role</button>
         </div>
 
-        <div class="grid g2">
-          ${roles.map(r => `
-            <div class="card">
-              <div class="card-header">
-                <div>
-                  <h2 style="font-size:17px">${esc(r.roleName)}</h2>
-                  <p class="sub">${esc(r.description || 'Target career track')}</p>
+        ${roles.length === 0 ? `
+          <div class="card empty" style="text-align:center;padding:48px 24px">
+            <div style="font-size:36px;margin-bottom:12px">🎯</div>
+            <h2 style="font-size:18px;margin-bottom:6px">No Target Roles Configured</h2>
+            <p class="sub" style="max-width:520px;margin:0 auto 18px">Create career tracks and define required benchmark skill proficiencies for your organization's roles.</p>
+            <button class="btn" data-act="openAddRoleModal">+ Create First Target Role</button>
+          </div>
+        ` : `
+          <div class="grid g2">
+            ${roles.map(r => `
+              <div class="card">
+                <div class="card-header">
+                  <div style="flex:1;min-width:200px">
+                    <h2 style="font-size:17px;margin:0 0 4px">${esc(r.roleName)}</h2>
+                    <p class="sub" style="margin:0">${esc(r.description || 'Target career track')}</p>
+                  </div>
+                  <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+                    <button class="btn ghost small" data-act="openEditRoleModal" data-id="${r.roleId}" data-name="${esc(r.roleName)}" data-desc="${esc(r.description || '')}" title="Edit role title and description">Edit Role</button>
+                    <button class="btn ghost small" data-act="openAddRoleSkillModal" data-id="${r.roleId}" data-name="${esc(r.roleName)}" title="Add required skill to role">+ Add Skill</button>
+                  </div>
                 </div>
-                <button class="btn ghost small" data-act="openAddRoleSkillModal" data-id="${r.roleId}" data-name="${esc(r.roleName)}">+ Add Skill</button>
-              </div>
-              <div class="tablewrap" style="margin-bottom:12px">
-                <table>
-                  <thead>
-                    <tr><th>Skill</th><th>Req Level</th><th>Weight</th><th></th></tr>
-                  </thead>
-                  <tbody>
-                    ${(r.skills || []).length ? (r.skills || []).map(sk => `
+                <div class="tablewrap" style="margin-bottom:12px">
+                  <table>
+                    <thead>
                       <tr>
-                        <td><strong>${esc(sk.skillName)}</strong></td>
-                        <td>Level ${sk.requiredLevel}</td>
-                        <td>${sk.weightPct}%</td>
-                        <td><button class="btn danger small" style="padding:2px 6px" data-act="delRoleSkill" data-roleid="${r.roleId}" data-skillid="${sk.skillId}">&times;</button></td>
+                        <th>Skill</th>
+                        <th>Required Level</th>
+                        <th>Weight</th>
+                        <th style="text-align:right">Actions</th>
                       </tr>
-                    `).join("") : '<tr><td colspan="4" class="empty">No skills mapped yet.</td></tr>'}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody>
+                      ${(r.skills || []).length ? (r.skills || []).map(sk => `
+                        <tr>
+                          <td>
+                            <strong>${esc(sk.skillName)}</strong>
+                            <div class="sub" style="font-size:11.5px">${esc(sk.category || 'General')}</div>
+                          </td>
+                          <td>
+                            <span class="chip" style="font-weight:600">Level ${sk.requiredLevel || 3}</span>
+                          </td>
+                          <td>${sk.weightPct || 25}%</td>
+                          <td style="text-align:right;white-space:nowrap">
+                            <button class="btn ghost small" style="padding:3px 9px;margin-right:4px" data-act="openEditRoleSkillModal"
+                              data-roleid="${r.roleId}" data-rolename="${esc(r.roleName)}" data-skillid="${sk.skillId}"
+                              data-skillname="${esc(sk.skillName)}" data-level="${sk.requiredLevel || 3}" data-weight="${sk.weightPct || 25}"
+                              title="Edit skill requirement">Edit</button>
+                            <button class="btn danger small" style="padding:3px 8px" data-act="delRoleSkill"
+                              data-roleid="${r.roleId}" data-rolename="${esc(r.roleName)}" data-skillid="${sk.skillId}" data-skillname="${esc(sk.skillName)}"
+                              title="Remove skill from role">&times;</button>
+                          </td>
+                        </tr>
+                      `).join("") : '<tr><td colspan="4" class="empty">No skills mapped yet. Click "+ Add Skill" above to map requirements.</td></tr>'}
+                    </tbody>
+                  </table>
+                </div>
+                <div style="display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--muted);padding-top:8px;border-top:1px solid var(--line)">
+                  <span><strong>${r.assignedEmployees || 0}</strong> employee(s) targeting this role</span>
+                  <button class="btn danger small" data-act="deleteRole" data-id="${r.roleId}" data-name="${esc(r.roleName)}">Delete Role</button>
+                </div>
               </div>
-              <div style="display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--muted)">
-                <span>${r.assignedEmployees || 0} employees targeting this role</span>
-                <button class="btn danger small" data-act="deleteRole" data-id="${r.roleId}">Delete Role</button>
-              </div>
-            </div>
-          `).join("")}
-        </div>
+            `).join("")}
+          </div>
+        `}
       `;
     },
 
@@ -1599,6 +1629,7 @@
         S.categories = await hrApi("/competency/categories");
         root.innerHTML = views.competency();
       } else if (v === "roles") {
+        root.innerHTML = '<div class="card empty">Loading role competency requirements…</div>';
         S.roles = await hrApi("/roles");
         root.innerHTML = views.roles();
       } else if (v === "gaps") {
@@ -1772,16 +1803,48 @@
         try {
           await hrApi("/roles", { method: "POST", body: { roleName: name, description: desc } });
           closeModal();
-          toast("Target role created");
+          toast("Target role created successfully");
+          loadView("roles");
+        } catch (err) { toast(err.message, true); }
+      };
+    } else if (act === "openEditRoleModal") {
+      const roleId = btn.dataset.id;
+      const roleName = btn.dataset.name || "";
+      const roleDesc = btn.dataset.desc || "";
+      const html = `
+        <div class="form-group">
+          <label>Target Role Title *</label>
+          <input id="editRoleName" value="${esc(roleName)}" required>
+        </div>
+        <div class="form-group">
+          <label>Role Purpose & Description</label>
+          <textarea id="editRoleDesc">${esc(roleDesc)}</textarea>
+        </div>
+        <div style="text-align:right;margin-top:16px">
+          <button class="btn" id="updateRoleBtn">Update Role</button>
+        </div>
+      `;
+      openModal("Edit Target Role", html);
+      document.getElementById("updateRoleBtn").onclick = async () => {
+        const name = document.getElementById("editRoleName").value.trim();
+        const desc = document.getElementById("editRoleDesc").value.trim();
+        if (!name) return alert("Enter role name");
+        try {
+          await hrApi(`/roles/${roleId}`, { method: "PUT", body: { roleName: name, description: desc } });
+          closeModal();
+          toast("Target role updated successfully");
           loadView("roles");
         } catch (err) { toast(err.message, true); }
       };
     } else if (act === "openAddRoleSkillModal") {
       const roleId = btn.dataset.id;
       const roleName = btn.dataset.name;
+      if (!S.meta.skills || !S.meta.skills.length) {
+        try { S.meta = await hrApi("/meta"); } catch (e) {}
+      }
       const skills = S.meta.skills || [];
       const html = `
-        <p class="sub" style="margin:0 0 12px">Role: <strong>${esc(roleName)}</strong></p>
+        <p class="sub" style="margin:0 0 12px">Target Role: <strong>${esc(roleName)}</strong></p>
         <div class="form-group">
           <label>Select Skill *</label>
           <select id="roleSkillId">
@@ -1799,36 +1862,80 @@
           </select>
         </div>
         <div class="form-group">
-          <label>Role Weight % (e.g. 20)</label>
+          <label>Role Weight % (5 to 100)</label>
           <input type="number" id="roleSkillWeight" value="25" min="5" max="100">
         </div>
         <div style="text-align:right;margin-top:16px">
           <button class="btn" id="saveRoleSkillBtn">Add to Role</button>
         </div>
       `;
-      openModal("Map Skill to Target Role", html);
+      openModal("Map Skill Requirement to Target Role", html);
       document.getElementById("saveRoleSkillBtn").onclick = async () => {
         const skId = parseInt(document.getElementById("roleSkillId").value, 10);
         const lvl = parseInt(document.getElementById("roleSkillLevel").value, 10);
         const wt = parseInt(document.getElementById("roleSkillWeight").value, 10);
+        if (isNaN(skId)) return alert("Select a skill");
         try {
           await hrApi(`/roles/${roleId}/skills`, { method: "POST", body: { skillId: skId, requiredLevel: lvl, weightPct: wt } });
           closeModal();
-          toast("Skill mapped to role");
+          toast("Skill requirement mapped to role");
+          loadView("roles");
+        } catch (err) { toast(err.message, true); }
+      };
+    } else if (act === "openEditRoleSkillModal") {
+      const roleId = btn.dataset.roleid;
+      const roleName = btn.dataset.rolename;
+      const skillId = btn.dataset.skillid;
+      const skillName = btn.dataset.skillname;
+      const curLevel = btn.dataset.level || "3";
+      const curWeight = btn.dataset.weight || "25";
+
+      const html = `
+        <p class="sub" style="margin:0 0 12px">Role: <strong>${esc(roleName)}</strong> &middot; Skill: <strong>${esc(skillName)}</strong></p>
+        <div class="form-group">
+          <label>Required Benchmark Level *</label>
+          <select id="editRoleSkillLevel">
+            <option value="1" ${curLevel == 1 ? "selected" : ""}>Level 1 - Fundamental</option>
+            <option value="2" ${curLevel == 2 ? "selected" : ""}>Level 2 - Developing</option>
+            <option value="3" ${curLevel == 3 ? "selected" : ""}>Level 3 - Proficient</option>
+            <option value="4" ${curLevel == 4 ? "selected" : ""}>Level 4 - Advanced</option>
+            <option value="5" ${curLevel == 5 ? "selected" : ""}>Level 5 - Expert</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Role Weight % (5 to 100)</label>
+          <input type="number" id="editRoleSkillWeight" value="${esc(curWeight)}" min="5" max="100">
+        </div>
+        <div style="text-align:right;margin-top:16px">
+          <button class="btn" id="updateRoleSkillBtn">Save Changes</button>
+        </div>
+      `;
+      openModal("Edit Skill Requirement", html);
+      document.getElementById("updateRoleSkillBtn").onclick = async () => {
+        const lvl = parseInt(document.getElementById("editRoleSkillLevel").value, 10);
+        const wt = parseInt(document.getElementById("editRoleSkillWeight").value, 10);
+        try {
+          await hrApi(`/roles/${roleId}/skills/${skillId}`, { method: "PUT", body: { requiredLevel: lvl, weightPct: wt } });
+          closeModal();
+          toast("Role skill requirement updated successfully");
           loadView("roles");
         } catch (err) { toast(err.message, true); }
       };
     } else if (act === "delRoleSkill") {
+      const skillName = btn.dataset.skillname || "this skill";
+      const roleName = btn.dataset.rolename || "this role";
+      if (!confirm(`Are you sure you want to remove the "${skillName}" requirement from ${roleName}?`)) return;
       try {
         await hrApi(`/roles/${btn.dataset.roleid}/skills/${btn.dataset.skillid}`, { method: "DELETE" });
-        toast("Skill removed from role");
+        toast("Skill requirement removed from role");
         loadView("roles");
       } catch (err) { toast(err.message, true); }
     } else if (act === "deleteRole") {
-      if (!confirm("Delete this target role?")) return;
+      const roleName = btn.dataset.name || "this target role";
+      if (!confirm(`Are you sure you want to delete the target role "${roleName}"?\nAll mapped skill requirements will also be removed.`)) return;
       try {
         await hrApi("/roles/" + btn.dataset.id, { method: "DELETE" });
-        toast("Role deleted");
+        toast("Target role deleted successfully");
         loadView("roles");
       } catch (err) { toast(err.message, true); }
     }

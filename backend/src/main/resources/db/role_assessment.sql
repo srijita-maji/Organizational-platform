@@ -9,9 +9,10 @@ CREATE TABLE IF NOT EXISTS ed_job_roles (
 ) ENGINE=InnoDB;
 
 CREATE TABLE IF NOT EXISTS ed_job_role_skills (
-  role_id    BIGINT NOT NULL,
-  skill_id   BIGINT NOT NULL,
-  weight_pct INT    NOT NULL,
+  role_id        BIGINT  NOT NULL,
+  skill_id       BIGINT  NOT NULL,
+  required_level TINYINT NOT NULL DEFAULT 3,
+  weight_pct     INT     NOT NULL DEFAULT 25,
   PRIMARY KEY (role_id, skill_id)
 ) ENGINE=InnoDB;
 
